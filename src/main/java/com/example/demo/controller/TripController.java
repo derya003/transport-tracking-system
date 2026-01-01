@@ -40,4 +40,10 @@ public class TripController {
 public Trip nextStop(@PathVariable Long tripId) {
     return tripService.moveToNextStop(tripId);
 }
+// ⏱️ ETA – dakika cinsinden
+@GetMapping("/{tripId}/eta")
+public long getEta(@PathVariable Long tripId) {
+    return tripService.calculateEtaMinutes(tripId);
+}
+
 }

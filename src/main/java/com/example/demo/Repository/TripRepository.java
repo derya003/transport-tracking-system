@@ -8,6 +8,9 @@ import com.example.demo.entity.Trip;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
-    // Aktif seferleri getir
+    // ✅ Aktif seferleri getir
     List<Trip> findByActiveTrue();
+
+    // ✅ Route bazlı toplam sefer sayısı (STATISTICS için)
+    long countByRouteId(Long routeId);
 }

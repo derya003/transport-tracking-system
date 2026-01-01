@@ -19,20 +19,70 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional=false)
-    @JoinColumn(name="trip_id")
+    // Bilet hangi sefere ait
+    @ManyToOne
+    @JoinColumn(name = "trip_id", nullable = false)
     private Trip trip;
 
-    @Column(nullable=false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    // STUDENT / FULL
+    @Column(nullable = false)
+    private String type;
 
-    @Column(nullable=false)
-    private Double price;
+    // Ücret
+    @Column(nullable = false)
+    private double price;
 
-    public Long getId() { return id; }
-    public Trip getTrip() { return trip; }
-    public void setTrip(Trip trip) { this.trip = trip; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    // Satın alma zamanı
+    @Column(name = "purchase_time", nullable = false)
+    private LocalDateTime purchaseTime;
+
+    // 🔥 DB'nin istediği alan (ASIL EKSİK OLAN)
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
+    // ===== GETTER / SETTER =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public Trip getTrip() {
+        return trip;
+    }
+
+    public void setTrip(Trip trip) {
+        this.trip = trip;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public double getPrice() {
+        return price;
+    }
+
+    public void setPrice(double price) {
+        this.price = price;
+    }
+
+    public LocalDateTime getPurchaseTime() {
+        return purchaseTime;
+    }
+
+    public void setPurchaseTime(LocalDateTime purchaseTime) {
+        this.purchaseTime = purchaseTime;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
