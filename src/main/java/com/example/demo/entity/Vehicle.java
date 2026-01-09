@@ -18,21 +18,20 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String plateNumber;
+    @Column(name = "bus_number", nullable = false, unique = true)
+    private String busNumber; // Otobüs numarası (örn: "34A", "101", "K-42")
 
     @Column(nullable = false)
-    private String type;
+    private String type; // Otobüs, Minibüs, Tramvay, Metro
 
     @ManyToOne
     @JoinColumn(name = "route_id")
-
     private Route route;
 
     public Long getId() { return id; }
 
-    public String getPlateNumber() { return plateNumber; }
-    public void setPlateNumber(String plateNumber) { this.plateNumber = plateNumber; }
+    public String getBusNumber() { return busNumber; }
+    public void setBusNumber(String busNumber) { this.busNumber = busNumber; }
 
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }

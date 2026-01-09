@@ -21,18 +21,32 @@ public class TripService {
     private final TripRepository tripRepository;
     private final VehicleRepository vehicleRepository;
     private final RouteRepository routeRepository;
+    private final PredictionEngine predictionEngine;
 
     public TripService(TripRepository tripRepository,
                        VehicleRepository vehicleRepository,
-                       RouteRepository routeRepository) {
+                       RouteRepository routeRepository,
+                       PredictionEngine predictionEngine) {
         this.tripRepository = tripRepository;
         this.vehicleRepository = vehicleRepository;
         this.routeRepository = routeRepository;
+        this.predictionEngine = predictionEngine;
     }
 
     // 🚍 SEFER BAŞLAT
     @Transactional
     public Trip startTrip(Long vehicleId, Long routeId) {
+        if (vehicleId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Vehicle ID is required");
+        }
+        
+        if (routeId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID is required");
+        }
 
         Vehicle vehicle = vehicleRepository.findById(vehicleId)
                 .orElseThrow(() ->
@@ -64,6 +78,11 @@ public class TripService {
     // ➡️ BİR SONRAKİ DURAK
     @Transactional
     public Trip moveToNextStop(Long tripId) {
+        if (tripId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Trip ID is required");
+        }
 
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() ->
@@ -90,36 +109,59 @@ public class TripService {
         return tripRepository.save(trip);
     }
 
-    // ⏱️ ETA – Varış süresi tahmini (dakika)
+    // ⏱️ ETA – Varış süresi tahmini (dakika) - Gelişmiş tahmin motoru kullanıyor
     public long calculateEtaMinutes(Long tripId) {
-
+        if (tripId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Trip ID is required");
+        }
+        
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() ->
                         new ResponseStatusException(HttpStatus.NOT_FOUND, "Trip not found"));
 
-        if (!trip.isActive()) {
-            return 0;
+        return predictionEngine.calculateTripEta(trip);
+    }
+
+    // ⏱️ Belirli bir durağa ETA hesapla (dakika)
+    public long calculateEtaToStop(Long tripId, Long stopId) {
+        if (tripId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Trip ID is required");
         }
+        
+        if (stopId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Stop ID is required");
+        }
+        
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() ->
+                        new ResponseStatusException(HttpStatus.NOT_FOUND, "Trip not found"));
 
-        int currentOrder = trip.getCurrentStopOrder();
-
-        double remainingDistanceKm = trip.getRoute()
-                .getRouteStops()
-                .stream()
-                .filter(rs -> rs.getStopOrder() >= currentOrder)
-                .mapToDouble(rs ->
-                        rs.getDistanceToNextKm() != null ? rs.getDistanceToNextKm() : 0
-                )
-                .sum();
-
-        double averageSpeedKmH = 30.0; // 🔥 sabit hız (simülasyon)
-        double etaHours = remainingDistanceKm / averageSpeedKmH;
-
-        return Math.round(etaHours * 60); // dakika
+        return predictionEngine.calculateEtaToStop(trip, stopId);
     }
 
     // ✅ AKTİF SEFERLER
     public List<Trip> getActiveTrips() {
         return tripRepository.findByActiveTrue();
+    }
+
+    // 📜 GEÇMİŞ SEFERLER
+    public List<Trip> getCompletedTrips() {
+        return tripRepository.findByActiveFalseOrderByEndTimeDesc();
+    }
+
+    // 📜 HAT BAZLI GEÇMİŞ SEFERLER
+    public List<Trip> getCompletedTripsByRoute(Long routeId) {
+        if (routeId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID is required");
+        }
+        return tripRepository.findByRouteIdAndActiveFalseOrderByEndTimeDesc(routeId);
     }
 }

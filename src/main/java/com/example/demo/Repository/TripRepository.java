@@ -13,4 +13,10 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
 
     // ✅ Route bazlı toplam sefer sayısı (STATISTICS için)
     long countByRouteId(Long routeId);
+
+    // 📜 Tamamlanmış seferleri getir (en yeni önce)
+    List<Trip> findByActiveFalseOrderByEndTimeDesc();
+
+    // 📜 Hat bazlı tamamlanmış seferler
+    List<Trip> findByRouteIdAndActiveFalseOrderByEndTimeDesc(Long routeId);
 }

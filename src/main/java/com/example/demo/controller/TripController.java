@@ -37,13 +37,33 @@ public class TripController {
     }
 
     @PutMapping("/{tripId}/next-stop")
-public Trip nextStop(@PathVariable Long tripId) {
-    return tripService.moveToNextStop(tripId);
-}
-// ⏱️ ETA – dakika cinsinden
-@GetMapping("/{tripId}/eta")
-public long getEta(@PathVariable Long tripId) {
-    return tripService.calculateEtaMinutes(tripId);
-}
+    public Trip nextStop(@PathVariable Long tripId) {
+        return tripService.moveToNextStop(tripId);
+    }
 
+    // ⏱️ ETA – dakika cinsinden (son durağa)
+    @GetMapping("/{tripId}/eta")
+    public long getEta(@PathVariable Long tripId) {
+        return tripService.calculateEtaMinutes(tripId);
+    }
+
+    // ⏱️ Belirli durağa ETA – dakika cinsinden
+    @GetMapping("/{tripId}/eta/stop/{stopId}")
+    public long getEtaToStop(
+            @PathVariable Long tripId,
+            @PathVariable Long stopId) {
+        return tripService.calculateEtaToStop(tripId, stopId);
+    }
+
+    // 📜 Tamamlanmış seferler
+    @GetMapping("/completed")
+    public List<Trip> getCompletedTrips() {
+        return tripService.getCompletedTrips();
+    }
+
+    // 📜 Hat bazlı tamamlanmış seferler
+    @GetMapping("/completed/route/{routeId}")
+    public List<Trip> getCompletedTripsByRoute(@PathVariable Long routeId) {
+        return tripService.getCompletedTripsByRoute(routeId);
+    }
 }

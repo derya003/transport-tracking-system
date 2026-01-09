@@ -2,7 +2,9 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.demo.Repository.RouteRepository;
 import com.example.demo.Repository.RouteStopRepository;
@@ -24,6 +26,11 @@ public class RouteService {
 
     // Route oluştur
     public Route createRoute(Route route) {
+        if (route == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route cannot be null");
+        }
         return routeRepository.save(route);
     }
 
@@ -34,17 +41,34 @@ public class RouteService {
 
     // ID ile route
     public Route getRouteById(Long id) {
+        if (id == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID is required");
+        }
         return routeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Route not found"));
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Route not found"));
     }
 
     // Route sil
     public void deleteRoute(Long id) {
+        if (id == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID is required");
+        }
         routeRepository.deleteById(id);
     }
 
     // 🔥 ROUTE'UN DURAKLARINI SIRALI GETİR
     public List<RouteStop> getRouteStopsOrdered(Long routeId) {
+        if (routeId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID is required");
+        }
         return routeStopRepository.findByRouteIdOrderByStopOrderAsc(routeId);
     }
 }
