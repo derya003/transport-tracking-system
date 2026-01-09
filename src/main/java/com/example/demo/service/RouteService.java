@@ -17,7 +17,7 @@ public class RouteService {
     private final RouteRepository routeRepository;
     private final RouteStopRepository routeStopRepository;
 
-    // 🔥 CONSTRUCTOR – İKİ REPOSITORY DE BURADA
+    // CONSTRUCTOR – İKİ REPOSITORY DE BURADA
     public RouteService(RouteRepository routeRepository,
                         RouteStopRepository routeStopRepository) {
         this.routeRepository = routeRepository;

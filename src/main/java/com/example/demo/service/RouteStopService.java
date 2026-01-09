@@ -1,5 +1,7 @@
 package com.example.demo.service;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,47 +29,37 @@ public class RouteStopService {
         this.routeStopRepository = routeStopRepository;
     }
 
+    // ===============================
+    // ROUTE'A DURAK EKLEME
+    // ===============================
     @Transactional
-    public RouteStop addStopToRoute(Long routeId, Long stopId, Integer order, Double distanceKm) {
-        // Validation
-        if (routeId == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Route ID is required");
-        }
-        
-        if (stopId == null) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Stop ID is required");
-        }
-        
-        if (order == null || order < 1) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Stop order must be greater than 0");
-        }
+    public RouteStop addStopToRoute(Long routeId, Long stopId,
+                                    Integer order, Double distanceKm) {
 
-        if (distanceKm != null && distanceKm < 0) {
-            throw new ResponseStatusException(
-                    HttpStatus.BAD_REQUEST,
-                    "Distance cannot be negative");
-        }
+        if (routeId == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Route ID is required");
+
+        if (stopId == null)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stop ID is required");
+
+        if (order == null || order < 1)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Stop order must be >= 1");
+
+        if (distanceKm != null && distanceKm < 0)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Distance cannot be negative");
 
         Route route = routeRepository.findById(routeId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Route not found"));
+                        HttpStatus.NOT_FOUND, "Route not found"));
 
         Stop stop = stopRepository.findById(stopId)
                 .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "Stop not found"));
+                        HttpStatus.NOT_FOUND, "Stop not found"));
 
-        // Aynı sırada başka durak var mı kontrol et
+        // Aynı sırada başka durak var mı?
         boolean orderExists = route.getRouteStops().stream()
                 .anyMatch(rs -> rs.getStopOrder().equals(order));
-        
+
         if (orderExists) {
             throw new ResponseStatusException(
                     HttpStatus.CONFLICT,
@@ -81,5 +73,44 @@ public class RouteStopService {
         routeStop.setDistanceToNextKm(distanceKm);
 
         return routeStopRepository.save(routeStop);
+    }
+
+    // ===============================
+    // 🔥 TEK DURAK SİLME (ASIL OLAY)
+    // ===============================
+    @Transactional
+    public void removeStopFromRoute(Long routeId, Long routeStopId) {
+
+        if (routeId == null || routeStopId == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Route ID and RouteStop ID are required");
+        }
+
+        RouteStop routeStop = routeStopRepository.findById(routeStopId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "RouteStop not found"));
+
+        // Güvenlik: yanlış route'tan silinmesin
+        if (!routeStop.getRoute().getId().equals(routeId)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "This stop does not belong to the given route");
+        }
+
+        // 1️⃣ RouteStop sil
+        routeStopRepository.delete(routeStop);
+
+        // 2️⃣ Kalan durakların sırasını düzelt
+        List<RouteStop> remainingStops =
+                routeStopRepository.findByRouteIdOrderByStopOrderAsc(routeId);
+
+        int order = 1;
+        for (RouteStop rs : remainingStops) {
+            rs.setStopOrder(order++);
+        }
+
+        routeStopRepository.saveAll(remainingStops);
     }
 }

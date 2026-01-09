@@ -18,7 +18,6 @@ public class Stop {
     @Column(nullable=false)
     private String name; // "İzmit Merkez"
 
-    // Koordinat opsiyonel ama tahmin için iyi
     private Double latitude;
     private Double longitude;
 

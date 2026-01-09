@@ -41,7 +41,7 @@ public class StatsController {
     return new RouteStatsResponse(tripCount, ticketCount, revenue);
 }
 
-    // 📊 Günlük istatistikler
+    //  Günlük istatistikler
     @GetMapping("/daily")
     public DailyStatsResponse getDailyStats(@RequestParam(required = false) LocalDate date) {
         if (date == null) {
@@ -55,7 +55,7 @@ public class StatsController {
         return new DailyStatsResponse(date, tripCount, ticketCount, revenue);
     }
 
-    // 📊 Haftalık istatistikler
+    //  Haftalık istatistikler
     @GetMapping("/weekly")
     public WeeklyStatsResponse getWeeklyStats(@RequestParam(required = false) LocalDate startDate) {
         if (startDate == null) {

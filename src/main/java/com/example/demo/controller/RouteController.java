@@ -20,11 +20,9 @@ import com.example.demo.service.RouteStopService;
 @RequestMapping("/api/routes")
 public class RouteController {
 
-    // SERVİSLER (FIELD)
     private final RouteService routeService;
     private final RouteStopService routeStopService;
 
-    // CONSTRUCTOR (BURASI 1 ve 2. MADDE)
     public RouteController(RouteService routeService,
                            RouteStopService routeStopService) {
         this.routeService = routeService;
@@ -49,25 +47,35 @@ public class RouteController {
         return routeService.getRouteById(id);
     }
 
-    //  Hat sil
+    // Hat sil
     @DeleteMapping("/{id}")
     public void deleteRoute(@PathVariable Long id) {
         routeService.deleteRoute(id);
     }
 
-    // ROUTE → STOP BAĞLAMA (EN ÖNEMLİ KISIM)
+    // Route → Stop ekle
     @PostMapping("/{routeId}/stops")
     public RouteStop addStopToRoute(
             @PathVariable Long routeId,
             @RequestParam Long stopId,
             @RequestParam Integer order,
-            @RequestParam(required = false) Double distanceKm
-    ) {
+            @RequestParam(required = false) Double distanceKm) {
+
         return routeStopService.addStopToRoute(routeId, stopId, order, distanceKm);
     }
 
+    // Route'un duraklarını sırayla getir
     @GetMapping("/{routeId}/stops")
-public List<RouteStop> getRouteStopsOrdered(@PathVariable Long routeId) {
-    return routeService.getRouteStopsOrdered(routeId);
-}
+    public List<RouteStop> getRouteStopsOrdered(@PathVariable Long routeId) {
+        return routeService.getRouteStopsOrdered(routeId);
+    }
+
+    // 🔥 ROUTE'TAN TEK DURAK SİLME (ASIL OLAY)
+    @DeleteMapping("/{routeId}/stops/{routeStopId}")
+    public void removeStopFromRoute(
+            @PathVariable Long routeId,
+            @PathVariable Long routeStopId) {
+
+        routeStopService.removeStopFromRoute(routeId, routeStopId);
+    }
 }
