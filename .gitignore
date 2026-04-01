@@ -1,0 +1,51 @@
+
+## `.gitignore`
+
+Bunu da ana klasördeki `.gitignore` dosyasına ekle:
+
+```gitignore
+# macOS
+.DS_Store
+
+# Logs
+logs
+*.log
+
+# Environment files
+.env
+.env.*
+application-local.properties
+
+# Node / Next.js
+frontend/node_modules
+frontend/.next
+frontend/out
+frontend/dist
+frontend/build
+frontend/.vercel
+
+# Java / Spring
+backend/target
+backend/build
+backend/.gradle
+backend/.idea
+backend/.classpath
+backend/.project
+backend/.settings
+
+# IDE
+.vscode
+.idea
+
+# Coverage / temp
+coverage
+tmp
+temp
+
+# Generated files
+*.class
+*.jar
+*.war
+
+# OS / misc
+Thumbs.db
